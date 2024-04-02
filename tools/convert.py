@@ -15,4 +15,4 @@ for file_name in os.listdir(in_directory):
         z = las.z
         intensity = las.intensity
 
-        np.save(out_director + '\\' + file_name[:file_name.index('.')] + ".npy", np.vstack((x, y, z)).T)
+        np.save(out_director + '\\' + file_name[:file_name.index('.')] + ".npy", np.vstack((x, y, z, intensity)).T)

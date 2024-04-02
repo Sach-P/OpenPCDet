@@ -15,3 +15,6 @@ venv/
 *.bin
 output
 version.py
+
+data/livoxlas/*.las
+data/livoxnpy/points/*.npy
