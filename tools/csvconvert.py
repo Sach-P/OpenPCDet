@@ -31,4 +31,6 @@ with open(r'C:\Users\sachp\sdmay24-31\OpenPCDet\tools\small.csv', newline='') as
             z.append(row['Z'])
             intensity.append(row['Reflectivity'])
 
+    np.save(out_directory + '\\' + str(fileNum) + ".npy", np.vstack((x, y, z, intensity)).T)
+
         
