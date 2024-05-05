@@ -22,8 +22,8 @@ def parse_config():
     parser = argparse.ArgumentParser(description='arg parser')
     parser.add_argument('--cfg_file', type=str, default=None, help='specify the config for training')
 
-    parser.add_argument('--batch_size', type=int, default=None, required=False, help='batch size for training')
-    parser.add_argument('--epochs', type=int, default=None, required=False, help='number of epochs to train for')
+    parser.add_argument('--batch_size', type=int, default=1, required=False, help='batch size for training')
+    parser.add_argument('--epochs', type=int, default=1, required=False, help='number of epochs to train for')
     parser.add_argument('--workers', type=int, default=4, help='number of workers for dataloader')
     parser.add_argument('--extra_tag', type=str, default='default', help='extra tag for this experiment')
     parser.add_argument('--ckpt', type=str, default=None, help='checkpoint to start from')
@@ -41,7 +41,7 @@ def parse_config():
 
     parser.add_argument('--max_waiting_mins', type=int, default=0, help='max waiting minutes')
     parser.add_argument('--start_epoch', type=int, default=0, help='')
-    parser.add_argument('--num_epochs_to_eval', type=int, default=0, help='number of checkpoints to be evaluated')
+    parser.add_argument('--num_epochs_to_eval', type=int, default=1, help='number of checkpoints to be evaluated')
     parser.add_argument('--save_to_file', action='store_true', default=False, help='')
     
     parser.add_argument('--use_tqdm_to_record', action='store_true', default=False, help='if True, the intermediate losses will not be logged to file, only tqdm will be used')
@@ -91,6 +91,8 @@ def main():
     ckpt_dir = output_dir / 'ckpt'
     output_dir.mkdir(parents=True, exist_ok=True)
     ckpt_dir.mkdir(parents=True, exist_ok=True)
+
+    print("Fuck this shit")
 
     log_file = output_dir / ('train_%s.log' % datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
     logger = common_utils.create_logger(log_file, rank=cfg.LOCAL_RANK)
@@ -200,6 +202,7 @@ def main():
     )
 
     if hasattr(train_set, 'use_shared_memory') and train_set.use_shared_memory:
+        print("HIFEHBKBSKJFKSBDKJFBKS")
         train_set.clean_shared_memory()
 
     logger.info('**********************End training %s/%s(%s)**********************\n\n\n'

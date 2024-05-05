@@ -25,9 +25,9 @@ class DataBaseSampler(object):
         self.db_infos = {}
         for class_name in class_names:
             self.db_infos[class_name] = []
-
+        
         self.use_shared_memory = sampler_cfg.get('USE_SHARED_MEMORY', False)
-
+        print(sampler_cfg.DB_INFO_PATH)
         for db_info_path in sampler_cfg.DB_INFO_PATH:
             db_info_path = self.root_path.resolve() / db_info_path
             if not db_info_path.exists():
@@ -39,7 +39,10 @@ class DataBaseSampler(object):
 
             with open(str(db_info_path), 'rb') as f:
                 infos = pickle.load(f)
+                print(infos)
                 [self.db_infos[cur_class].extend(infos[cur_class]) for cur_class in class_names]
+
+        # print(self.db_infos)
 
         for func_name, val in sampler_cfg.PREPARE.items():
             self.db_infos = getattr(self, func_name)(self.db_infos, val)
@@ -464,7 +467,6 @@ class DataBaseSampler(object):
                 sample_group['sample_num'] = str(int(self.sample_class_num[class_name]) - num_gt)
             if int(sample_group['sample_num']) > 0:
                 sampled_dict = self.sample_with_fixed_number(class_name, sample_group)
-
                 sampled_boxes = np.stack([x['box3d_lidar'] for x in sampled_dict], axis=0).astype(np.float32)
 
                 assert not self.sampler_cfg.get('DATABASE_WITH_FAKELIDAR', False), 'Please use latest codes to generate GT_DATABASE'

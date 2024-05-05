@@ -1,7 +1,6 @@
 import copy
 import pickle
 import os
-
 import numpy as np
 
 from ...ops.roiaware_pool3d import roiaware_pool3d_utils
@@ -63,10 +62,9 @@ class CustomDataset(DatasetTemplate):
         return np.array(gt_boxes, dtype=np.float32), np.array(gt_names)
 
     def get_lidar(self, idx):
-        lidar_file = self.root_path / 'points' / ('%s.npy' % idx)
+        lidar_file = self.root_path / 'points' / ('%s.bin' % idx)
         assert lidar_file.exists()
-        point_features = np.load(lidar_file)
-        return point_features
+        return np.fromfile(str(lidar_file), dtype=np.float32).reshape(-1, 4)
 
     def set_split(self, split):
         super().__init__(
@@ -177,25 +175,33 @@ class CustomDataset(DatasetTemplate):
             infos = pickle.load(f)
 
         for k in range(len(infos)):
-            print('gt_database sample: %d/%d' % (k + 1, len(infos)))
+            # print('gt_database sample: %d/%d' % (k + 1, len(infos)))
             info = infos[k]
             sample_idx = info['point_cloud']['lidar_idx']
             points = self.get_lidar(sample_idx)
+            # print(points)
             annos = info['annos']
             names = annos['name']
             gt_boxes = annos['gt_boxes_lidar']
-
             num_obj = gt_boxes.shape[0]
             point_indices = roiaware_pool3d_utils.points_in_boxes_cpu(
                 torch.from_numpy(points[:, 0:3]), torch.from_numpy(gt_boxes)
             ).numpy()  # (nboxes, npoints)
 
+            if(int(float(sample_idx)) < 2):
+                print(sample_idx)
+                print(points[:, 0:3])
+                print(gt_boxes)
+                print(point_indices)
+            # print(point_indices)
             for i in range(num_obj):
                 filename = '%s_%s_%d.bin' % (sample_idx, names[i], i)
+                print(filename)
                 filepath = database_save_path / filename
                 gt_points = points[point_indices[i] > 0]
-
+                # gt_points = points[point_indices[i]]
                 gt_points[:, :3] -= gt_boxes[i, :3]
+                # print(gt_points)
                 with open(filepath, 'w') as f:
                     gt_points.tofile(f)
 
@@ -247,6 +253,7 @@ def create_custom_infos(dataset_cfg, class_names, data_path, save_path, workers=
     custom_infos_train = dataset.get_infos(
         class_names, num_workers=workers, has_label=True, num_features=num_features
     )
+    print(custom_infos_train)
     with open(train_filename, 'wb') as f:
         pickle.dump(custom_infos_train, f)
     print('Custom info train file is saved to %s' % train_filename)
@@ -277,7 +284,7 @@ if __name__ == '__main__':
         ROOT_DIR = (Path(__file__).resolve().parent / '../../../').resolve()
         create_custom_infos(
             dataset_cfg=dataset_cfg,
-            class_names=['Vehicle', 'Pedestrian', 'Cyclist'],
+            class_names=['Person'],
             data_path=ROOT_DIR / 'data' / 'custom',
             save_path=ROOT_DIR / 'data' / 'custom',
         )

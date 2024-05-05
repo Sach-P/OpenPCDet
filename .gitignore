@@ -13,5 +13,6 @@ venv/
 *.pkl
 *.zip
 *.bin
+*.npy
 output
 version.py
